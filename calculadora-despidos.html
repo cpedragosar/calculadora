@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Calculadora de Despidos — Delegado Sindical</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #e8a020;
+    --accent2: #4a9cf0;
+    --danger: #e84040;
+    --success: #2ecf82;
+    --text: #e8e8f0;
+    --muted: #8890b0;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    min-height: 100vh;
+    padding-bottom: 3rem;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.25rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .badge-sindical {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(232,160,32,0.12);
+    border: 1px solid rgba(232,160,32,0.3);
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  h1 {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: var(--mono);
+  }
+
+  main { padding: 1.25rem; max-width: 560px; margin: 0 auto; }
+
+  /* Tabs */
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 1.5rem;
+  }
+
+  .tab {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 8px 4px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .tab.active {
+    background: var(--accent);
+    color: #0f1117;
+    font-weight: 600;
+  }
+
+  .tab:hover:not(.active) { background: var(--surface2); color: var(--text); }
+
+  /* Sections */
+  .section { margin-bottom: 1.25rem; }
+
+  .section-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Fields */
+  .field { margin-bottom: 1rem; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 5px;
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+
+  input[type="number"], input[type="date"], select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus { border-color: var(--accent); }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Radio tipo despido */
+  .tipo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 1.25rem;
+  }
+
+  .tipo-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    line-height: 1.4;
+  }
+
+  .tipo-btn .tipo-label { display: block; color: var(--text); font-weight: 600; font-size: 12px; }
+  .tipo-btn .tipo-sub { display: block; font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .tipo-btn .tipo-rate { display: block; font-size: 13px; color: var(--accent); font-weight: 600; margin-top: 4px; }
+
+  .tipo-btn.active {
+    border-color: var(--accent);
+    background: rgba(232,160,32,0.08);
+  }
+
+  .tipo-btn.active .tipo-label { color: var(--accent); }
+
+  /* Toggle */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .toggle-row:last-child { border-bottom: none; }
+
+  .toggle-label { font-size: 13px; color: var(--text); }
+  .toggle-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .toggle {
+    width: 40px;
+    height: 22px;
+    background: var(--border);
+    border-radius: 11px;
+    cursor: pointer;
+    position: relative;
+    border: none;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle.on { background: var(--accent); }
+
+  .toggle::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s;
+  }
+
+  .toggle.on::after { transform: translateX(18px); }
+
+  /* Calcular btn */
+  .btn-calc {
+    width: 100%;
+    background: var(--accent);
+    color: #0f1117;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 14px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    margin-top: 1.5rem;
+  }
+
+  .btn-calc:hover { opacity: 0.9; }
+  .btn-calc:active { transform: scale(0.98); }
+
+  /* Resultados */
+  #resultados { display: none; margin-top: 1.75rem; }
+
+  .resultado-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .resultado-tipo {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .resultado-nombre {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* Desglose */
+  .desglose {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+
+  .desglose-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 1rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .desglose-row:last-child { border-bottom: none; }
+  .desglose-row.total-row {
+    background: rgba(232,160,32,0.08);
+    border-top: 1px solid rgba(232,160,32,0.3);
+  }
+
+  .desglose-key { color: var(--muted); }
+  .desglose-val {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .desglose-val.highlight { color: var(--accent); font-size: 16px; }
+  .desglose-val.danger { color: var(--danger); }
+  .desglose-val.success { color: var(--success); }
+
+  /* Gran total */
+  .gran-total {
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.25rem;
+    text-align: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .gt-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .gt-amount {
+    font-family: var(--mono);
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .gt-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Notas legales */
+  .nota-legal {
+    background: rgba(74,156,240,0.08);
+    border: 1px solid rgba(74,156,240,0.25);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+
+  .nota-legal strong { color: var(--accent2); }
+
+  /* Info tooltip */
+  .info-chip {
+    display: inline-block;
+    background: rgba(74,156,240,0.12);
+    color: var(--accent2);
+    font-family: var(--mono);
+    font-size: 10px;
+    border-radius: 3px;
+    padding: 2px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* Btn compartir */
+  .btn-share {
+    width: 100%;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 11px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: all 0.15s;
+    margin-top: 0.5rem;
+  }
+
+  .btn-share:hover { border-color: var(--success); color: var(--success); }
+
+  /* Alerta improcedente */
+  .alerta-box {
+    background: rgba(232,64,64,0.08);
+    border: 1px solid rgba(232,64,64,0.3);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-size: 12px;
+    color: #f09090;
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>Calculadora de Despidos</h1>
+      <div class="subtitle">Herramienta para delegados sindicales</div>
+    </div>
+    <div style="margin-left:auto">
+      <span class="badge-sindical">ET / LGSS</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- TIPO DE DESPIDO -->
+  <div class="section">
+    <div class="section-title">Tipo de despido</div>
+    <div class="tipo-grid">
+      <button class="tipo-btn active" data-tipo="improcedente" onclick="setTipo(this)">
+        <span class="tipo-label">Improcedente</span>
+        <span class="tipo-sub">Sin causa / causa no probada</span>
+        <span class="tipo-rate">45+33 días/año*</span>
+      </button>
+      <button class="tipo-btn" data-tipo="procedente" onclick="setTipo(this)">
+        <span class="tipo-label">Procedente</span>
+        <span class="tipo-sub">Causa disciplinaria probada</span>
+        <span class="tipo-rate">0 días/año</span>
+      </button>
+      <button class="tipo-btn" data-tipo="objetivo" onclick="setTipo(this)">
+        <span class="tipo-label">Objetivo</span>
+        <span class="tipo-sub">Art. 52 ET (causas econ.)</span>
+        <span class="tipo-rate">20 días/año</span>
+      </button>
+      <button class="tipo-btn" data-tipo="ere" onclick="setTipo(this)">
+        <span class="tipo-label">ERE / Colectivo</span>
+        <span class="tipo-sub">Art. 51 ET (colectivo)</span>
+        <span class="tipo-rate">20 días/año</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- DATOS DEL TRABAJADOR -->
+  <div class="section">
+    <div class="section-title">Datos del trabajador</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Fecha de alta</label>
+        <input type="date" id="fecha_alta">
+      </div>
+      <div class="field">
+        <label>Fecha de baja</label>
+        <input type="date" id="fecha_baja">
+      </div>
+    </div>
+    <div class="field">
+      <label>Salario bruto mensual (€)</label>
+      <input type="number" id="salario_mensual" placeholder="2.500,00" step="0.01" min="0">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Pagas extra / año <span class="info-chip">incluidas o no</span></label>
+        <select id="pagas_extra">
+          <option value="2">2 pagas extra</option>
+          <option value="4">4 pagas extra</option>
+          <option value="0">Prorrateadas (ya incluidas)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Días vacaciones/año</label>
+        <input type="number" id="dias_vacaciones" value="22" min="0" max="60">
+      </div>
+    </div>
+  </div>
+
+  <!-- PREAVISO -->
+  <div class="section" id="seccion_preaviso">
+    <div class="section-title">Preaviso</div>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Preaviso no respetado</div>
+        <div class="toggle-sub" id="sub_preaviso">Objetivo/ERE: 15 días | Disciplinario: no aplica</div>
+      </div>
+      <button class="toggle" id="tog_preaviso" onclick="toggle(this)"></button>
+    </div>
+    <div id="campo_dias_preaviso" class="field hidden" style="margin-top:0.75rem">
+      <label>Días de preaviso no dados</label>
+      <input type="number" id="dias_preaviso" value="15" min="0" max="30">
+    </div>
+  </div>
+
+  <!-- ELEMENTOS ADICIONALES -->
+  <div class="section">
+    <div class="section-title">Conceptos adicionales</div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Salarios de tramitación</div>
+        <div class="toggle-sub">Solo despido improcedente con readmisión o sin opción empresarial</div>
+      </div>
+      <button class="toggle" id="tog_tramitacion" onclick="toggle(this)"></button>
+    </div>
+    <div id="campo_tramitacion" class="field hidden" style="margin-top:0.75rem">
+      <label>Días sin cobrar hasta sentencia (estimación)</label>
+      <input type="number" id="dias_tramitacion" value="90" min="0" max="730">
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Vacaciones no disfrutadas</div>
+        <div class="toggle-sub">Días pendientes al momento del despido</div>
+      </div>
+      <button class="toggle" id="tog_vacaciones" onclick="toggle(this)"></button>
+    </div>
+    <div id="campo_vacaciones_pend" class="field hidden" style="margin-top:0.75rem">
+      <label>Días de vacaciones pendientes</label>
+      <input type="number" id="dias_vac_pend" value="10" min="0" max="60">
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-label">Prestación por desempleo</div>
+        <div class="toggle-sub">Estimación orientativa según cotización</div>
+      </div>
+      <button class="toggle" id="tog_paro" onclick="toggle(this)"></button>
+    </div>
+    <div id="campo_paro" class="field-row hidden" style="margin-top:0.75rem">
+      <div class="field">
+        <label>Meses cotizados (últimos 6 años)</label>
+        <input type="number" id="meses_cotizados" value="72" min="12" max="72">
+      </div>
+      <div class="field">
+        <label>Hijos a cargo</label>
+        <select id="hijos">
+          <option value="0">Sin hijos</option>
+          <option value="1">1 hijo</option>
+          <option value="2">2 hijos</option>
+          <option value="3">3 o más</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-calc" onclick="calcular()">▶ Calcular indemnización</button>
+
+  <!-- RESULTADOS -->
+  <div id="resultados">
+    <div class="resultado-header">
+      <div class="resultado-tipo" id="r_tipo"></div>
+      <div class="resultado-nombre" id="r_nombre"></div>
+    </div>
+
+    <!-- Gran total -->
+    <div class="gran-total">
+      <div class="gt-label">Total a percibir (sin IRPF)</div>
+      <div class="gt-amount" id="r_total_fmt"></div>
+      <div class="gt-sub" id="r_total_sub"></div>
+    </div>
+
+    <!-- Desglose indemnización -->
+    <div class="desglose" id="bloque_indem">
+      <div class="desglose-row" style="background:var(--surface2)">
+        <span class="desglose-key" style="font-weight:600; color:var(--text)">Indemnización legal</span>
+        <span></span>
+      </div>
+      <div class="desglose-row">
+        <span class="desglose-key">Antigüedad</span>
+        <span class="desglose-val" id="r_antiguedad"></span>
+      </div>
+      <div class="desglose-row">
+        <span class="desglose-key">Días/año aplicables</span>
+        <span class="desglose-val" id="r_dias_anio"></span>
+      </div>
+      <div class="desglose-row" id="fila_detalle_tramos">
+        <span class="desglose-key" style="font-size:11px; line-height:1.5" id="r_dias_detalle"></span>
+        <span></span>
+      </div>
+      <div class="desglose-row">
+        <span class="desglose-key">Salario diario (s/ 365)</span>
+        <span class="desglose-val" id="r_salario_dia"></span>
+      </div>
+      <div class="desglose-row">
+        <span class="desglose-key">Tope máximo (42 mensualidades)</span>
+        <span class="desglose-val" id="r_tope"></span>
+      </div>
+      <div class="desglose-row total-row">
+        <span class="desglose-key">Indemnización neta</span>
+        <span class="desglose-val highlight" id="r_indem"></span>
+      </div>
+    </div>
+
+    <!-- Finiquito -->
+    <div class="desglose">
+      <div class="desglose-row" style="background:var(--surface2)">
+        <span class="desglose-key" style="font-weight:600; color:var(--text)">Finiquito (partes proporcionales)</span>
+        <span></span>
+      </div>
+      <div class="desglose-row">
+        <span class="desglose-key">PP pagas extra</span>
+        <span class="desglose-val" id="r_pp_pagas"></span>
+      </div>
+      <div class="desglose-row">
+        <span class="desglose-key">PP vacaciones</span>
+        <span class="desglose-val" id="r_pp_vac"></span>
+      </div>
+      <div class="desglose-row total-row">
+        <span class="desglose-key">Subtotal finiquito</span>
+        <span class="desglose-val highlight" id="r_finiquito"></span>
+      </div>
+    </div>
+
+    <!-- Adicionales -->
+    <div class="desglose" id="bloque_adicionales">
+      <div class="desglose-row" style="background:var(--surface2)">
+        <span class="desglose-key" style="font-weight:600; color:var(--text)">Conceptos adicionales</span>
+        <span></span>
+      </div>
+      <div class="desglose-row" id="fila_vac_pend" style="display:none">
+        <span class="desglose-key">Vacaciones no disfrutadas</span>
+        <span class="desglose-val success" id="r_vac_pend"></span>
+      </div>
+      <div class="desglose-row" id="fila_preaviso" style="display:none">
+        <span class="desglose-key">Preaviso no respetado</span>
+        <span class="desglose-val success" id="r_preaviso_val"></span>
+      </div>
+      <div class="desglose-row" id="fila_tramitacion" style="display:none">
+        <span class="desglose-key">Salarios de tramitación</span>
+        <span class="desglose-val success" id="r_tramitacion_val"></span>
+      </div>
+    </div>
+
+    <!-- Paro -->
+    <div class="desglose" id="bloque_paro" style="display:none">
+      <div class="desglose-row" style="background:var(--surface2)">
+        <span class="desglose-key" style="font-weight:600; color:var(--text)">Prestación por desempleo (estimación)</span>
+        <span></span>
+      </div>
+      <div class="desglose-row">
+        <span class="desglose-key">Duración estimada</span>
+        <span class="desglose-val" id="r_paro_duracion"></span>
+      </div>
+      <div class="desglose-row">
+        <span class="desglose-key">Cuantía mensual estimada</span>
+        <span class="desglose-val" id="r_paro_mensual"></span>
+      </div>
+      <div class="desglose-row total-row">
+        <span class="desglose-key">Total prestación</span>
+        <span class="desglose-val highlight" id="r_paro_total"></span>
+      </div>
+    </div>
+
+    <!-- Nota improcedente -->
+    <div class="alerta-box" id="alerta_improcedente" style="display:none">
+      ⚠️ <strong>Despido improcedente:</strong> La empresa debe elegir entre readmisión o abonar la indemnización de 33 días/año. Si opta por la readmisión, el trabajador tiene derecho a los salarios de tramitación desde el despido hasta la sentencia.
+    </div>
+
+    <!-- Notas legales -->
+    <div class="nota-legal">
+      <strong>Base legal:</strong> Arts. 56 (improcedente), 55 (procedente), 52-53 (objetivo) y 51 (colectivo) del ET. Tope: 24 mensualidades para objetivo/ERE, 42 para improcedente. Salario diario = salario bruto anual / 365. <em>Las PP de pagas extra solo se incluyen en el salario regulador si no están ya prorrateadas.</em>
+    </div>
+    <div class="nota-legal">
+      <strong>Aviso:</strong> Esta calculadora es orientativa. La indemnización real puede variar según convenio colectivo, acuerdo de empresa o circunstancias específicas del contrato. Consulta siempre con un asesor jurídico laboral.
+    </div>
+
+    <button class="btn-share" onclick="compartir()">📋 Copiar resumen para WhatsApp</button>
+  </div>
+
+</main>
+
+<script>
+  let tipoActivo = 'improcedente';
+
+  function setTipo(btn) {
+    document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    tipoActivo = btn.dataset.tipo;
+
+    // Mostrar/ocultar preaviso según tipo
+    const secPre = document.getElementById('seccion_preaviso');
+    const subPre = document.getElementById('sub_preaviso');
+    if (tipoActivo === 'procedente') {
+      secPre.style.opacity = '0.4';
+      subPre.textContent = 'No aplica en despido disciplinario procedente';
+    } else {
+      secPre.style.opacity = '1';
+      subPre.textContent = tipoActivo === 'improcedente'
+        ? 'No existe obligación de preaviso en despido disciplinario'
+        : 'Objetivo/ERE: mínimo 15 días de preaviso';
+    }
+  }
+
+  function toggle(btn) {
+    btn.classList.toggle('on');
+    const id = btn.id.replace('tog_', 'campo_');
+    const campo = document.getElementById(id);
+    if (campo) campo.classList.toggle('hidden');
+  }
+
+  function fmt(n) {
+    return new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n) + ' €';
+  }
+
+  function calcular() {
+    const fechaAlta = new Date(document.getElementById('fecha_alta').value);
+    const fechaBaja = new Date(document.getElementById('fecha_baja').value);
+    const salarioMensual = parseFloat(document.getElementById('salario_mensual').value) || 0;
+    const pagasExtra = parseInt(document.getElementById('pagas_extra').value);
+    const diasVacAnio = parseInt(document.getElementById('dias_vacaciones').value) || 22;
+
+    if (!document.getElementById('fecha_alta').value || !document.getElementById('fecha_baja').value || salarioMensual <= 0) {
+      alert('Por favor, rellena las fechas y el salario.');
+      return;
+    }
+
+    if (fechaBaja <= fechaAlta) {
+      alert('La fecha de baja debe ser posterior a la de alta.');
+      return;
+    }
+
+    // Antigüedad en años (fracción real)
+    const msAnio = 1000 * 60 * 60 * 24 * 365.25;
+    const aniosExactos = (fechaBaja - fechaAlta) / msAnio;
+    const aniosCeil = Math.ceil(aniosExactos * 10) / 10; // redondeo a 1 decimal
+
+    // Salario anual bruto
+    let salarioAnual;
+    if (pagasExtra === 0) {
+      salarioAnual = salarioMensual * 12;
+    } else {
+      salarioAnual = salarioMensual * (12 + pagasExtra);
+    }
+
+    const salarioDia = salarioAnual / 365;
+
+    // Días por año según tipo
+    let diasAnio, topeMax;
+    let indemBruta = 0;
+    let indemDetalle = '';
+
+    const CORTE = new Date('2012-02-12');
+
+    if (tipoActivo === 'improcedente') {
+      topeMax = 42;
+      // Tramo pre-reforma (45 días/año, tope 42 mensualidades)
+      if (fechaAlta < CORTE) {
+        const finTramo1 = fechaBaja < CORTE ? fechaBaja : CORTE;
+        const aniosTramo1 = (finTramo1 - fechaAlta) / msAnio;
+        const indemTramo1 = Math.min(salarioDia * 45 * aniosTramo1, salarioMensual * 42);
+        indemBruta += indemTramo1;
+      }
+      // Tramo post-reforma (33 días/año, tope 24 mensualidades)
+      if (fechaBaja > CORTE) {
+        const inicioTramo2 = fechaAlta > CORTE ? fechaAlta : CORTE;
+        const aniosTramo2 = (fechaBaja - inicioTramo2) / msAnio;
+        const indemTramo2 = Math.min(salarioDia * 33 * aniosTramo2, salarioMensual * 24);
+        indemBruta += indemTramo2;
+      }
+      // Tope global: 42 mensualidades sobre el total
+      diasAnio = fechaAlta < CORTE ? '45+33' : 33;
+      indemDetalle = fechaAlta < CORTE
+        ? 'Tramo hasta 12/02/2012: 45 días/año (tope 42 mens.) + Tramo desde 12/02/2012: 33 días/año (tope 24 mens.)'
+        : '33 días/año (tope 24 mensualidades)';
+    } else if (tipoActivo === 'procedente') {
+      diasAnio = 0;
+      topeMax = 0;
+      indemDetalle = 'Sin indemnización';
+    } else {
+      diasAnio = 20;
+      topeMax = 24;
+      indemBruta = salarioDia * 20 * aniosExactos;
+      indemDetalle = '20 días/año (tope 12 mensualidades)';
+    }
+
+    // Tope global final
+    const tope = salarioMensual * (tipoActivo === 'improcedente' ? 42 : topeMax);
+    const indem = tipoActivo === 'improcedente' ? Math.min(indemBruta, tope) : Math.min(indemBruta, tope);
+
+    // PP pagas extra (meses transcurridos en el año actual)
+    const diaDelAnio = Math.floor((fechaBaja - new Date(fechaBaja.getFullYear(), 0, 1)) / (1000 * 60 * 60 * 24)) + 1;
+    const fracAnio = diaDelAnio / 365;
+    let ppPagas = 0;
+    if (pagasExtra > 0) {
+      ppPagas = (salarioMensual * pagasExtra * fracAnio);
+    }
+
+    // PP vacaciones del año en curso
+    const diasVacDevengados = diasVacAnio * fracAnio;
+    const diasVacDisfrutados = 0; // simplificado; el usuario ajusta
+    const ppVac = Math.max(0, (diasVacDevengados - diasVacDisfrutados)) * salarioDia;
+
+    // Finiquito
+    const finiquito = ppPagas + ppVac;
+
+    // Adicionales
+    let vacPend = 0, praeavisoVal = 0, tramitacionVal = 0;
+
+    if (document.getElementById('tog_vacaciones').classList.contains('on')) {
+      const dVacPend = parseInt(document.getElementById('dias_vac_pend').value) || 0;
+      vacPend = dVacPend * salarioDia;
+    }
+
+    if (document.getElementById('tog_preaviso').classList.contains('on') && tipoActivo !== 'procedente') {
+      const dPre = parseInt(document.getElementById('dias_preaviso').value) || 0;
+      praeavisoVal = dPre * salarioDia;
+    }
+
+    if (document.getElementById('tog_tramitacion').classList.contains('on')) {
+      const dTram = parseInt(document.getElementById('dias_tramitacion').value) || 0;
+      tramitacionVal = dTram * salarioDia;
+    }
+
+    // Paro
+    let paroDuracion = 0, paroMensual = 0, paroTotal = 0;
+    const mostrarParo = document.getElementById('tog_paro').classList.contains('on');
+    if (mostrarParo) {
+      const mesesCot = parseInt(document.getElementById('meses_cotizados').value) || 0;
+      // Escala duración (RD 625/1985)
+      if (mesesCot >= 72) paroDuracion = 24;
+      else if (mesesCot >= 60) paroDuracion = 21;
+      else if (mesesCot >= 48) paroDuracion = 18;
+      else if (mesesCot >= 36) paroDuracion = 15;
+      else if (mesesCot >= 24) paroDuracion = 12;
+      else if (mesesCot >= 18) paroDuracion = 8;
+      else paroDuracion = 4;
+
+      // Cuantía: 70% primeros 6 meses, 60% resto (sobre base reguladora = salario base + pagas)
+      const baseReg = salarioAnual / 12;
+      const hijos = parseInt(document.getElementById('hijos').value);
+      // Topes SEPE 2024 (aprox)
+      const tope1hijo = hijos === 0 ? 1.75 : hijos === 1 ? 2.00 : 2.25;
+      const iprem = 600; // IPREM 2024 aprox
+      const topeMax70 = iprem * tope1hijo;
+      const topeMin = iprem * 0.8;
+      let cuantia70 = Math.min(baseReg * 0.70, topeMax70);
+      let cuantia60 = Math.min(baseReg * 0.60, topeMax70);
+      cuantia70 = Math.max(cuantia70, topeMin);
+      cuantia60 = Math.max(cuantia60, topeMin);
+
+      if (paroDuracion <= 6) {
+        paroTotal = paroDuracion * cuantia70;
+        paroMensual = cuantia70;
+      } else {
+        paroTotal = 6 * cuantia70 + (paroDuracion - 6) * cuantia60;
+        paroMensual = cuantia70; // primer tramo
+      }
+    }
+
+    // Total
+    const total = indem + finiquito + vacPend + praeavisoVal + tramitacionVal;
+
+    // --- Renderizar ---
+    document.getElementById('resultados').style.display = 'block';
+
+    const tipoLabel = {
+      improcedente: 'Despido improcedente',
+      procedente: 'Despido procedente / disciplinario',
+      objetivo: 'Despido objetivo — Art. 52 ET',
+      ere: 'Despido colectivo — ERE / Art. 51 ET'
+    };
+
+    document.getElementById('r_tipo').textContent = tipoLabel[tipoActivo];
+    document.getElementById('r_nombre').textContent = `Antigüedad: ${aniosExactos.toFixed(2)} años`;
+
+    document.getElementById('r_total_fmt').textContent = fmt(total);
+    document.getElementById('r_total_sub').textContent =
+      tipoActivo === 'procedente'
+        ? 'Solo finiquito (sin indemnización al ser procedente)'
+        : 'Indemnización + finiquito' + (vacPend || praeavisoVal || tramitacionVal ? ' + conceptos adicionales' : '');
+
+    document.getElementById('r_antiguedad').textContent = aniosExactos.toFixed(2) + ' años';
+    document.getElementById('r_dias_anio').textContent = typeof diasAnio === 'string' ? diasAnio + ' días/año (dos tramos)' : diasAnio + ' días/año';
+    document.getElementById('r_dias_detalle').textContent = indemDetalle;
+    document.getElementById('r_salario_dia').textContent = fmt(salarioDia) + '/día';
+    document.getElementById('r_tope').textContent = topeMax > 0 ? fmt(tope) + ` (tope global ${tipoActivo === 'improcedente' ? 42 : topeMax} mensualidades)` : 'No aplica';
+    document.getElementById('r_indem').textContent = fmt(indem);
+
+    document.getElementById('r_pp_pagas').textContent = fmt(ppPagas);
+    document.getElementById('r_pp_vac').textContent = fmt(ppVac) + ' (PP año en curso)';
+    document.getElementById('r_finiquito').textContent = fmt(finiquito);
+
+    // Adicionales
+    const hayAdicionales = vacPend > 0 || praeavisoVal > 0 || tramitacionVal > 0;
+    document.getElementById('bloque_adicionales').style.display = hayAdicionales ? '' : 'none';
+
+    const filaVac = document.getElementById('fila_vac_pend');
+    if (vacPend > 0) { filaVac.style.display = ''; document.getElementById('r_vac_pend').textContent = fmt(vacPend); }
+    else filaVac.style.display = 'none';
+
+    const filaPre = document.getElementById('fila_preaviso');
+    if (praeavisoVal > 0) { filaPre.style.display = ''; document.getElementById('r_preaviso_val').textContent = fmt(praeavisoVal); }
+    else filaPre.style.display = 'none';
+
+    const filaTram = document.getElementById('fila_tramitacion');
+    if (tramitacionVal > 0) { filaTram.style.display = ''; document.getElementById('r_tramitacion_val').textContent = fmt(tramitacionVal); }
+    else filaTram.style.display = 'none';
+
+    // Paro
+    document.getElementById('bloque_paro').style.display = mostrarParo ? '' : 'none';
+    if (mostrarParo) {
+      document.getElementById('r_paro_duracion').textContent = paroDuracion + ' meses';
+      document.getElementById('r_paro_mensual').textContent = fmt(paroMensual) + '/mes (1er tramo)';
+      document.getElementById('r_paro_total').textContent = fmt(paroTotal);
+    }
+
+    // Alerta improcedente
+    document.getElementById('alerta_improcedente').style.display =
+      tipoActivo === 'improcedente' ? '' : 'none';
+
+    // Scroll suave
+    document.getElementById('resultados').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Guardar para compartir
+    window._resumen = generarResumen({
+      tipo: tipoLabel[tipoActivo],
+      antiguedad: aniosExactos,
+      indem, finiquito, vacPend, praeavisoVal, tramitacionVal, total,
+      paroDuracion, paroTotal, mostrarParo
+    });
+  }
+
+  function generarResumen(d) {
+    const lineas = [
+      `📋 *CÁLCULO DE DESPIDO — DELEGADO SINDICAL*`,
+      ``,
+      `*Tipo:* ${d.tipo}`,
+      `*Antigüedad:* ${d.antiguedad.toFixed(2)} años`,
+      ``,
+      `💰 *INDEMNIZACIÓN LEGAL*`,
+      `   ${fmt(d.indem)}`,
+      ``,
+      `📄 *FINIQUITO (PP)*`,
+      `   ${fmt(d.finiquito)}`,
+    ];
+    if (d.vacPend > 0) lineas.push(``, `🏖 *Vacaciones pendientes:* ${fmt(d.vacPend)}`);
+    if (d.praeavisoVal > 0) lineas.push(`⏰ *Preaviso no dado:* ${fmt(d.praeavisoVal)}`);
+    if (d.tramitacionVal > 0) lineas.push(`⚖️ *Salarios tramitación:* ${fmt(d.tramitacionVal)}`);
+    lineas.push(``, `✅ *TOTAL A PERCIBIR: ${fmt(d.total)}*`);
+    if (d.mostrarParo) {
+      lineas.push(``, `📊 *PRESTACIÓN DESEMPLEO (estimación)*`);
+      lineas.push(`   ${d.paroDuracion} meses | Total: ${fmt(d.paroTotal)}`);
+    }
+    lineas.push(``, `_Cálculo orientativo. Art. 56/52/51 ET. Herramienta sindical._`);
+    return lineas.join('\n');
+  }
+
+  function compartir() {
+    if (!window._resumen) { alert('Primero calcula la indemnización.'); return; }
+    if (navigator.share) {
+      navigator.share({ title: 'Cálculo de despido', text: window._resumen });
+    } else {
+      navigator.clipboard.writeText(window._resumen).then(() => {
+        alert('✅ Resumen copiado. Pégalo en WhatsApp.');
+      });
+    }
+  }
+
+  // Fecha de baja por defecto = hoy
+  document.getElementById('fecha_baja').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
